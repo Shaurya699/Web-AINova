@@ -5,10 +5,12 @@ import { IKImage } from "imagekitio-react";
 import model from "../../lib/gemini";
 import Markdown from "react-markdown";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import debounce from "lodash/debounce"; // Correct lodash import
 
 const NewPrompt = ({ data }) => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [accumulatedText, setAccumulatedText] = useState(""); // New state for accumulated text
   const [img, setImg] = useState({
     isLoading: false,
     error: "",
@@ -62,6 +64,11 @@ const NewPrompt = ({ data }) => {
     },
   });
 
+  // Debounced function to update the answer state more efficiently
+  const updateAnswerDebounced = useRef(
+    debounce((text) => setAnswer(text), 200)
+  ).current;
+
   const add = async (text, isInitial) => {
     if (!isInitial) setQuestion(text);
 
@@ -69,17 +76,32 @@ const NewPrompt = ({ data }) => {
       const result = await chat.sendMessageStream(
         Object.entries(img.aiData).length ? [img.aiData, text] : [text]
       );
-      let accumulatedText = "";
+      let newText = "";
+
+      // Set a timeout for stream completion
+      const timeout = setTimeout(() => {
+        if (!newText) {
+          console.log("Stream timed out");
+          mutation.mutate(); // Mutate even if the stream times out
+        }
+      }, 10000); // Set 10 seconds timeout
+
+      // Process stream
       for await (const chunk of result.stream) {
+        clearTimeout(timeout); // Clear timeout if chunk is received
         const chunkText = chunk.text();
-        console.log(chunkText);
-        accumulatedText += chunkText;
-        setAnswer(accumulatedText);
+        if (chunkText) {
+          newText += chunkText;
+          setAccumulatedText((prev) => prev + chunkText);
+          updateAnswerDebounced(newText); // Debounced update
+        }
       }
 
-      mutation.mutate();
+      mutation.mutate(); // Mutate once the stream ends
     } catch (err) {
       console.log("Error sending message:", err);
+      // Retry logic in case of error
+      setTimeout(() => add(text, isInitial), 2000); // Retry after 2 seconds
     }
   };
 
