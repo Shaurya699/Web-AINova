@@ -12,10 +12,7 @@ const Homepage = () => {
       <div className="left">
         <h1>AI NOVA</h1>
         <h2>Supercharge your creativity and productivity</h2>
-        <h3>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Placeat sint
-          dolorem doloribus, architecto dolor.
-        </h3>
+        <h3>Evolving minds beyond the edge of reality.</h3>
         <Link to="/dashboard">Get Started</Link>
       </div>
       <div className="right">
@@ -38,22 +35,22 @@ const Homepage = () => {
             <TypeAnimation
               sequence={[
                 // Same substring at the start will only be typed out once, initially
-                "Human:We produce food for Mice",
+                "Human:What can you do ?",
                 2000,
                 () => {
                   setTypingStatus("bot");
                 },
-                "Bot:We produce food for Hamsters",
+                "Bot:I can give answer to any of your questions",
                 2000,
                 () => {
                   setTypingStatus("human2");
                 },
-                "Human2:We produce food for Guinea Pigs",
+                "Human2:Where is Italy located ?",
                 2000,
                 () => {
                   setTypingStatus("bot");
                 },
-                "Bot:We produce food for Chinchillas",
+                "Bot:Italy is a country in Southern and Western Europe that's located on the Italian Peninsula and a number of islands in the Mediterranean Sea",
                 2000,
                 () => {
                   setTypingStatus("human1");
