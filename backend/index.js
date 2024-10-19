@@ -21,6 +21,8 @@ app.use(
   })
 );
 
+app.use(express.static(path.join(__dirname, "dist")));
+
 app.use(express.json());
 
 const connect = async () => {
@@ -41,6 +43,10 @@ const imagekit = new ImageKit({
 app.get("/api/upload", (req, res) => {
   const result = imagekit.getAuthenticationParameters();
   res.send(result);
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 app.post("/api/chats", ClerkExpressRequireAuth(), async (req, res) => {
